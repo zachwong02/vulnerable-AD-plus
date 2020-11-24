@@ -35,6 +35,8 @@ Invoke-VulnAD -UsersLimit 100 -DomainName "cs.org"
 ```
 
 ### Missions
+```
 Zerologon - Done
 Ldap - Setup anonymous
 SMB - Thinking
+```
