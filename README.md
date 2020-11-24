@@ -34,6 +34,7 @@ IEX((new-object net.webclient).downloadstring("https://raw.githubusercontent.com
 Invoke-VulnAD -UsersLimit 100 -DomainName "cs.org"
 ```
 
-### TODO
-- Add More realistic scenarios
-- Click close issue button on github
+### Missions
+Zerologon - Done
+Ldap - Setup anonymous
+SMB - Thinking
