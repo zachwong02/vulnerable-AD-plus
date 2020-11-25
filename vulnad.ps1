@@ -54,7 +54,7 @@ function VulnAD-AddADGroup {
         }
         $Global:AllObjects += $group;
     }
-    Try {Add-ADGroupMember -Identity "Domain Admins" -Member "IT Admins"} Catch{}
+    Try {Add-ADGroupMember -Identity "Domain Admins" -Members "IT Admins"} Catch{}
 }
 function VulnAD-AddADUser {
     Param(
