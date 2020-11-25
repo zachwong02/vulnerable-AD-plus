@@ -20,14 +20,14 @@ function Write-Info { param( $String ) Write-Host $Global:InfoLine $String -Fore
 function ShowBanner {
     $banner  = @()
     $banner+= $Global:Spacing + ''
-    $banner+= $Global:Spacing + '██╗   ██╗██╗   ██╗██╗     ███╗   ██╗ █████╗ ██████╗ '
-    $banner+= $Global:Spacing + '██║   ██║██║   ██║██║     ████╗  ██║██╔══██╗██╔══██╗'
-    $banner+= $Global:Spacing + '██║   ██║██║   ██║██║     ██╔██╗ ██║███████║██║  ██║'
-    $banner+= $Global:Spacing + '╚██╗ ██╔╝██║   ██║██║     ██║╚██╗██║██╔══██║██║  ██║'
-    $banner+= $Global:Spacing + ' ╚████╔╝ ╚██████╔╝███████╗██║ ╚████║██║  ██║██████╔╝'
-    $banner+= $Global:Spacing + '  ╚═══╝   ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝'
+    $banner+= $Global:Spacing + '██╗   ██╗██╗   ██╗██╗     ███╗   ██╗ █████╗ ██████╗     ██╗'
+    $banner+= $Global:Spacing + '██║   ██║██║   ██║██║     ████╗  ██║██╔══██╗██╔══██╗    ██║'
+    $banner+= $Global:Spacing + '██║   ██║██║   ██║██║     ██╔██╗ ██║███████║██║  ██║██████████║'
+    $banner+= $Global:Spacing + '╚██╗ ██╔╝██║   ██║██║     ██║╚██╗██║██╔══██║██║  ██║╚═══██╔═══╝'
+    $banner+= $Global:Spacing + ' ╚████╔╝ ╚██████╔╝███████╗██║ ╚████║██║  ██║██████╔╝    ██║'
+    $banner+= $Global:Spacing + '  ╚═══╝   ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝     ╚═╝'
     $banner+= $Global:Spacing + ''                                                  
-    $banner+= $Global:Spacing + 'By wazehell @safe_buffer'
+    $banner+= $Global:Spacing + 'By wazehell @safe_buffer - modified by WaterExecution'
     $banner | foreach-object {
         Write-Host $_ -ForegroundColor (Get-Random -Input @('Green','Cyan','Yellow','gray','white'))
     }                             
@@ -174,7 +174,7 @@ function VulnAD-DefaultPassword
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         $password = ([System.Web.Security.Membership]::GeneratePassword(12,2))
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $password -AsPlainText -Force)
-        Set-ADUser $randomuser -Description "need to be changed $password"
+        Set-ADUser $randomuser -Description "New user generated password: $password"
         Write-Info "Password in Description : $randomuser $password"
     }
 }
@@ -183,7 +183,7 @@ function VulnAD-PasswordSpraying {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 12); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $same_password -AsPlainText -Force)
-        Set-ADUser $randomuser -Description "default password"
+        Set-ADUser $randomuser -Description "Default company reset password"
         Write-Info "Same Password (Password Spraying) : $randomuser"
     }
 }
