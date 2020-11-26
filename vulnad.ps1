@@ -106,7 +106,7 @@ function VulnAD-BadAcls {
         $DstGroup = Get-ADGroup -Identity $mgroup
         $SrcGroup = Get-ADGroup -Identity $ngroup
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
-        Write-Info "BadACL $abuse $ngroup to $mgroup"
+        Write-Info "BadACL $mgroup has $abuse permission for $ngroup"
     }
     foreach ($abuse in $Global:BadACL) {
         $hgroup = VulnAD-GetRandom -InputList $Global:HighGroups
@@ -114,13 +114,13 @@ function VulnAD-BadAcls {
         $DstGroup = Get-ADGroup -Identity $hgroup
         $SrcGroup = Get-ADGroup -Identity $mgroup
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
-        Write-Info "BadACL $abuse $mgroup to $hgroup"
+        Write-Info "BadACL $hgroup has $abuse permission for $mgroup"
     }
-    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 25); $i=$i+1 ) {
+    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 20); $i=$i+1 ) {
         $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
         $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
         $randomgroup = VulnAD-GetRandom -InputList $Global:AllObjects
-        if ((Get-Random -Minimum 1 -Maximum 2)){
+        if ((Get-Random -Maximum 2)){
             $Dstobj = Get-ADUser -Identity $randomuser
             $Srcobj = Get-ADGroup -Identity $randomgroup
         }else{
@@ -128,7 +128,18 @@ function VulnAD-BadAcls {
             $Dstobj = Get-ADGroup -Identity $randomgroup
         }
         VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
-        Write-Info "BadACL $abuse $randomuser and $randomgroup"
+        Write-Info "BadACL $randomgroup has $abuse permission for $randomuser"
+    }
+    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 10); $i=$i+1 ) {
+        $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
+        $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
+        $randomuser2 = VulnAD-GetRandom -InputList $Global:CreatedUsers
+        If(-not($randomuser -eq $randomuser2)){
+        $Dstobj = Get-ADUser -Identity $randomuser
+        $Srcobj = Get-ADUser -Identity $randomuser2
+        VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
+        Write-Info "BadACL $randomuser has $abuse permission for $randomuser2"
+        }
     }
 }
 function VulnAD-Kerberoasting {
