@@ -136,7 +136,11 @@ function VulnAD-Kerberoasting {
         if ($selected_service -ne $sv) {
             $svc = $sv.split(',')[0];
             $spn = $sv.split(',')[1];
+            if ((Get-Random -Maximum 2)){
 	    $password = VulnAD-GetRandom -InputList $Global:BadPasswords;
+            }else{
+	    $password = ([System.Web.Security.Membership]::GeneratePassword(12,2))
+            }
             Try { New-ADUser -Name $svc -SamAccountName $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
 			Write-Info "Creating $svc services account"
         }
