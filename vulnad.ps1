@@ -5,7 +5,7 @@ $Global:HighGroups = @('Office Admin','IT Admins','Executives');
 $Global:MidGroups = @('Senior management','Project management');
 $Global:NormalGroups = @('marketing','sales','accounting');
 $Global:BadACL = @('GenericAll','GenericWrite','WriteOwner','WriteDACL','Self');
-$Global:ServicesAccountsAndSPNs = @('mssql_svc,mssqlserver','http_svc,httpserver','exchange_svc,exserver');
+$Global:ServicesAccountsAndSPNs = @('mssql_svc,mssqlserver','http_svc,httpserver','exchange_svc,exserver','ignored,ignored');
 $Global:CreatedUsers = @();
 $Global:AllObjects = @();
 $Global:Domain = "";
@@ -106,7 +106,7 @@ function VulnAD-BadAcls {
         $DstGroup = Get-ADGroup -Identity $mgroup
         $SrcGroup = Get-ADGroup -Identity $ngroup
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
-        Write-Info "BadACL $mgroup has $abuse permission for $ngroup"
+        Write-Info "BadACL $abuse $ngroup to $mgroup"
     }
     foreach ($abuse in $Global:BadACL) {
         $hgroup = VulnAD-GetRandom -InputList $Global:HighGroups
@@ -114,13 +114,13 @@ function VulnAD-BadAcls {
         $DstGroup = Get-ADGroup -Identity $hgroup
         $SrcGroup = Get-ADGroup -Identity $mgroup
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
-        Write-Info "BadACL $hgroup has $abuse permission for $mgroup"
+        Write-Info "BadACL $abuse $mgroup to $hgroup"
     }
-    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 20); $i=$i+1 ) {
+    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 25); $i=$i+1 ) {
         $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
         $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
         $randomgroup = VulnAD-GetRandom -InputList $Global:AllObjects
-        if ((Get-Random -Maximum 2)){
+        if ((Get-Random -Minimum 1 -Maximum 2)){
             $Dstobj = Get-ADUser -Identity $randomuser
             $Srcobj = Get-ADGroup -Identity $randomgroup
         }else{
@@ -128,35 +128,19 @@ function VulnAD-BadAcls {
             $Dstobj = Get-ADGroup -Identity $randomgroup
         }
         VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
-        Write-Info "BadACL $randomgroup has $abuse permission for $randomuser"
-    }
-    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 10); $i=$i+1 ) {
-        $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
-        $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
-        $randomuser2 = VulnAD-GetRandom -InputList $Global:CreatedUsers
-        If(-not($randomuser -eq $randomuser2)){
-        $Dstobj = Get-ADUser -Identity $randomuser
-        $Srcobj = Get-ADUser -Identity $randomuser2
-        VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
-        Write-Info "BadACL $randomuser has $abuse permission for $randomuser2"
-        }
+        Write-Info "BadACL $abuse $randomuser and $randomgroup"
     }
 }
 function VulnAD-Kerberoasting {
     $selected_service = (VulnAD-GetRandom -InputList $Global:ServicesAccountsAndSPNs)
-    $svc = $selected_service.split(',')[0];
-    $spn = $selected_service.split(',')[1];
     $password = VulnAD-GetRandom -InputList $Global:BadPasswords;
-    Write-Info "Kerberoasting $svc $spn"
-    Try { New-ADServiceAccount -Name $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -RestrictToSingleComputer -PassThru } Catch {}
     foreach ($sv in $Global:ServicesAccountsAndSPNs) {
         if ($selected_service -ne $sv) {
             $svc = $sv.split(',')[0];
             $spn = $sv.split(',')[1];
-            Write-Info "Creating $svc services account"
             $password = ([System.Web.Security.Membership]::GeneratePassword(12,2))
-            Try { New-ADServiceAccount -Name $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -RestrictToSingleComputer -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru } Catch {}
-
+            Try { New-ADUser -Name $svc -SamAccountName $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
+			Write-Info "Creating $svc services account"
         }
     }
 }
@@ -175,9 +159,9 @@ function VulnAD-DnsAdmins {
         Add-ADGroupMember -Identity "DnsAdmins" -Members $randomuser
         Write-Info "DnsAdmins : $randomuser"
     }
-    $randomg = (VulnAD-GetRandom -InputList $Global:MidGroups)
-    Add-ADGroupMember -Identity "DnsAdmins" -Members $randomg
-    Write-Info "DnsAdmins Nested Group : $randomg"
+    $randomgroup = (VulnAD-GetRandom -InputList $Global:MidGroups)
+    Add-ADGroupMember -Identity "DnsAdmins" -Members $randomgroup
+    Write-Info "DnsAdmins Nested Group : $randomgroup"
 }
 function VulnAD-DefaultPassword
  {
