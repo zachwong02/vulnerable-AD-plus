@@ -116,11 +116,11 @@ function VulnAD-BadAcls {
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
         Write-Info "BadACL $abuse $mgroup to $hgroup"
     }
-    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 25); $i=$i+1 ) {
+    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 20); $i=$i+1 ) {
         $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
         $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
         $randomgroup = VulnAD-GetRandom -InputList $Global:AllObjects
-        if ((Get-Random -Minimum 1 -Maximum 2)){
+        if ((Get-Random -Maximum 2)){
             $Dstobj = Get-ADUser -Identity $randomuser
             $Srcobj = Get-ADGroup -Identity $randomgroup
         }else{
