@@ -148,9 +148,9 @@ function VulnAD-Kerberoasting {
             $svc = $sv.split(',')[0];
             $spn = $sv.split(',')[1];
             if ((Get-Random -Maximum 2)){
-		$password = VulnAD-GetRandom -InputList $Global:BadPasswords;
+				$password = VulnAD-GetRandom -InputList $Global:BadPasswords;
             }else{
-		$password = ([System.Web.Security.Membership]::GeneratePassword(12,2))
+				$password = ([System.Web.Security.Membership]::GeneratePassword(12,2))
             }
             Try { New-ADUser -Name $svc -SamAccountName $svc -ServicePrincipalNames "$svc/$spn.$Global:Domain" -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
 			Write-Info "Creating $svc services account"
@@ -176,13 +176,26 @@ function VulnAD-DnsAdmins {
     Add-ADGroupMember -Identity "DnsAdmins" -Members $randomgroup
     Write-Info "DnsAdmins Nested Group : $randomgroup"
 }
+
+function VulnAD-MoreAdmins
+   for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
+        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        Add-ADGroupMember -Identity "Enterprise Admins" -Members $randomuser
+        Write-Info "Enterprise Admins : $randomuser"
+    }
+   for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
+        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        Add-ADGroupMember -Identity "Account Operators" -Members $randomuser
+        Write-Info "Account Operators : $randomuser"
+    }
+}
 function VulnAD-DefaultPassword
  {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         $password = ([System.Web.Security.Membership]::GeneratePassword(12,2))
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $password -AsPlainText -Force)
-        Set-ADUser $randomuser -Description "New user generated password: $password"
+        Set-ADUser $randomuser -Description "New user generated password: $password" -ChangePasswordAtLogon $true
         Write-Info "Password in Description : $randomuser $password"
     }
 }
@@ -191,7 +204,7 @@ function VulnAD-PasswordSpraying {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 12); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $same_password -AsPlainText -Force)
-        Set-ADUser $randomuser -Description "Default company reset password"
+        Set-ADUser $randomuser -Description "Company default password(Reset ASAP)"
         Write-Info "Same Password (Password Spraying) : $randomuser"
     }
 }
@@ -223,6 +236,13 @@ function VulnAD-DisableSMBSigning {
     Set-SmbClientConfiguration -RequireSecuritySignature 0 -EnableSecuritySignature 0 -Confirm -Force
 }
 
+function VulnAD-EnableWinRM {
+    Enable-PSRemoting -Force
+    Set-Item wsman:\localhost\client\trustedhosts * -Force
+    #(Get-PSSessionConfiguration -Name "Microsoft.PowerShell").SecurityDescriptorSDDL
+    Set-PSSessionConfiguration -Name "Microsoft.PowerShell" -SecurityDescriptorSddl "O:NSG:BAD:P(A;;GA;;;BA)(A;;GA;;;WD)(A;;GA;;;IU)S:P(AU;FA;GA;;;WD)(AU;SA;GXGW;;;WD)"
+}
+
 function Invoke-VulnAD {
     Param(
         [int]$UsersLimit = 100,
@@ -250,6 +270,8 @@ function Invoke-VulnAD {
     Write-Good "AS-REPRoasting Done"
     VulnAD-DnsAdmins
     Write-Good "DnsAdmins Done"
+    VulnAD-MoreAdmins
+    Write-Good "MoreAdmins Done"
     VulnAD-DefaultPassword
     Write-Good "Leaked Password Done"
     VulnAD-PasswordSpraying
@@ -258,4 +280,6 @@ function Invoke-VulnAD {
     Write-Good "DCSync Done"
     VulnAD-DisableSMBSigning
     Write-Good "SMB Signing Disabled"
+    VulnAD-EnableWinRM
+    Write-Good "Windows Remote Management Enabled"
 }
