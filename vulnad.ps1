@@ -269,7 +269,7 @@ function Invoke-VulnAD {
     Write-Good "AS-REPRoasting Done"
     VulnAD-DnsAdmins
     Write-Good "DnsAdmins Done"
-	VulnAD-MoreAdmins
+    VulnAD-MoreAdmins
     Write-Good "MoreAdmins Done"
     VulnAD-DefaultPassword
     Write-Good "Leaked Password Done"
@@ -279,6 +279,6 @@ function Invoke-VulnAD {
     Write-Good "DCSync Done"
     VulnAD-DisableSMBSigning
     Write-Good "SMB Signing Disabled"
-	VulnAD-EnableWinRM
-	Write-Good "Windows Remote Management Enabled"
+    VulnAD-EnableWinRM
+    Write-Good "Windows Remote Management Enabled"
 }
