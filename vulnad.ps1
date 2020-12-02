@@ -176,7 +176,7 @@ function VulnAD-DnsAdmins {
     Add-ADGroupMember -Identity "DnsAdmins" -Members $randomgroup
     Write-Info "DnsAdmins Nested Group : $randomgroup"
 }
-function VulnAD-MoreAdmins
+function VulnAD-MoreAdmins {
    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         Add-ADGroupMember -Identity "Enterprise Admins" -Members $randomuser
