@@ -176,6 +176,18 @@ function VulnAD-DnsAdmins {
     Add-ADGroupMember -Identity "DnsAdmins" -Members $randomgroup
     Write-Info "DnsAdmins Nested Group : $randomgroup"
 }
+function VulnAD-MoreAdmins
+   for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
+        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        Add-ADGroupMember -Identity "Enterprise Admins" -Members $randomuser
+        Write-Info "Enterprise Admins : $randomuser"
+    }
+   for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
+        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        Add-ADGroupMember -Identity "Account Operators" -Members $randomuser
+        Write-Info "Account Operators : $randomuser"
+    }
+}
 function VulnAD-DefaultPassword
  {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
@@ -257,6 +269,8 @@ function Invoke-VulnAD {
     Write-Good "AS-REPRoasting Done"
     VulnAD-DnsAdmins
     Write-Good "DnsAdmins Done"
+	VulnAD-MoreAdmins
+    Write-Good "MoreAdmins Done"
     VulnAD-DefaultPassword
     Write-Good "Leaked Password Done"
     VulnAD-PasswordSpraying
@@ -265,6 +279,6 @@ function Invoke-VulnAD {
     Write-Good "DCSync Done"
     VulnAD-DisableSMBSigning
     Write-Good "SMB Signing Disabled"
-    VulnAD-EnableWinRM
-    Write-Good "Windows Remote Management Enabled"
+	VulnAD-EnableWinRM
+	Write-Good "Windows Remote Management Enabled"
 }
