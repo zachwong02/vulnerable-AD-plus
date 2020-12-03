@@ -282,7 +282,7 @@ function Invoke-VulnAD {
     Write-Good "AS-REPRoasting Done"
     VulnAD-DnsAdmins
     Write-Good "DnsAdmins Done"
-	VulnAD-MoreAdmins
+    VulnAD-MoreAdmins
     Write-Good "MoreAdmins Done"
     VulnAD-DefaultPassword
     Write-Good "Leaked Password Done"
