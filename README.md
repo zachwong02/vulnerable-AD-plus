@@ -15,15 +15,24 @@ Create a vulnerable active directory that's allowing you to test most of active 
 - Abusing ACLs/ACEs
 - Kerberoasting
 - AS-REP Roasting
-- Abuse DnsAdmins
+- Abuse DnsAdmins (...)
 - Password in AD User comment
 - Password Spraying
-- DCSync
-- Silver Ticket
-- Golden Ticket 
-- Pass-the-Hash
-- Pass-the-Ticket
+- DCSync (...)
+- Silver Ticket (...)
+- Golden Ticket (...)
+- Pass-the-Hash (...)
+- Pass-the-Ticket (...)
 - SMB Signing Disabled
+- Bad WinRM permission
+- Anonymous LDAP query
+- Public SMB Share
+- Zerologon (Check version)
+
+### Improved QOL
+- "Fixed" Randomizer
+- Password is crackable... within a few days
+- Multiple ways to PWN
 
 ### Example
 ```powershell
@@ -32,11 +41,4 @@ Install-ADDSForest -CreateDnsDelegation:$false -DatabasePath "C:\\Windows\\NTDS"
 # if you already installed Active Directory, just run the script !
 IEX((new-object net.webclient).downloadstring("https://raw.githubusercontent.com/wazehell/vulnerable-AD/master/vulnad.ps1"));
 Invoke-VulnAD -UsersLimit 100 -DomainName "cs.org"
-```
-
-### Missions
-```
-Zerologon - Done
-Ldap - Setup anonymous
-SMB - Thinking
 ```
