@@ -232,7 +232,7 @@ function VulnAD-DCSync {
     }
 }
 function VulnAD-DisableSMBSigning {
-    Set-SmbClientConfiguration -RequireSecuritySignature 0 -EnableSecuritySignature 0 -Confirm -Force
+        Set-SmbClientConfiguration -RequireSecuritySignature 0 -EnableSecuritySignature 0 -Confirm -Force
 }
 
 function VulnAD-EnableWinRM {
@@ -240,6 +240,19 @@ function VulnAD-EnableWinRM {
 	Set-Item wsman:\localhost\client\trustedhosts * -Force
 	#(Get-PSSessionConfiguration -Name "Microsoft.PowerShell").SecurityDescriptorSDDL
 	Set-PSSessionConfiguration -Name "Microsoft.PowerShell" -SecurityDescriptorSddl "O:NSG:BAD:P(A;;GA;;;BA)(A;;GA;;;WD)(A;;GA;;;IU)S:P(AU;FA;GA;;;WD)(AU;SA;GXGW;;;WD)"
+}
+
+function VulnAD-AnonymousLDAP {
+	$Dcname = Get-ADDomain | Select-Object -ExpandProperty DistinguishedName
+	$Adsi = 'LDAP://CN=Directory Service,CN=Windows NT,CN=Services,CN=Configuration,' + $Dcname
+	$AnonADSI = [ADSI]$Adsi
+	$AnonADSI.Put("dSHeuristics","0000002")
+	$AnonADSI.SetInfo()
+}
+
+function VulnAD-PublicSMBShare {
+	mkdir C:\Common
+	New-SmbShare -Name Common -Path C:\Common -FullAccess Everyone
 }
 
 function Invoke-VulnAD {
@@ -269,7 +282,7 @@ function Invoke-VulnAD {
     Write-Good "AS-REPRoasting Done"
     VulnAD-DnsAdmins
     Write-Good "DnsAdmins Done"
-    VulnAD-MoreAdmins
+	VulnAD-MoreAdmins
     Write-Good "MoreAdmins Done"
     VulnAD-DefaultPassword
     Write-Good "Leaked Password Done"
@@ -281,4 +294,8 @@ function Invoke-VulnAD {
     Write-Good "SMB Signing Disabled"
     VulnAD-EnableWinRM
     Write-Good "Windows Remote Management Enabled"
+    VulnAD-AnonymousLDAP
+    Write-Good "Anonymous LDAP Query Enabled"
+    VulnAD-PublicSMBShare
+    Write-Good "Created Public SMB Share"
 }
