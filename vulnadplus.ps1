@@ -248,7 +248,7 @@ function VulnAD-AnonymousLDAP {
 	$AnonADSI = [ADSI]$Adsi
 	$AnonADSI.Put("dSHeuristics","0000002")
 	$AnonADSI.SetInfo()
-	$ADSI = [ADSI]'LDAP://CN=Users,' + $Dcname
+	$ADSI = [ADSI]('LDAP://CN=Users,' + $Dcname)
 	$Anon = New-Object System.Security.Principal.NTAccount("ANONYMOUS LOGON")
 	$SID = $Anon.Translate([System.Security.Principal.SecurityIdentifier])
 	$adRights = [System.DirectoryServices.ActiveDirectoryRights] "GenericRead"
