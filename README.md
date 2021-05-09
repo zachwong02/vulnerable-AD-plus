@@ -4,8 +4,6 @@
 </h1>
 
 Create a vulnerable active directory that's allowing you to test most of active directory attacks in local lab
-### WIP
-Add anonymous logon to ldap users folder in for anonymous ldap query
 
 ### Main Features
 - Randomize Attacks
