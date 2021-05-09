@@ -248,6 +248,15 @@ function VulnAD-AnonymousLDAP {
 	$AnonADSI = [ADSI]$Adsi
 	$AnonADSI.Put("dSHeuristics","0000002")
 	$AnonADSI.SetInfo()
+	$ADSI = [ADSI]'LDAP://CN=Users,' + $Dcname
+	$Anon = New-Object System.Security.Principal.NTAccount("ANONYMOUS LOGON")
+	$SID = $Anon.Translate([System.Security.Principal.SecurityIdentifier])
+	$adRights = [System.DirectoryServices.ActiveDirectoryRights] "GenericRead"
+	$type = [System.Security.AccessControl.AccessControlType] "Allow"
+	$inheritanceType = [System.DirectoryServices.ActiveDirectorySecurityInheritance] "All"
+	$ace = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $SID,$adRights,$type,$inheritanceType
+	$ADSI.PSBase.ObjectSecurity.ModifyAccessRule([System.Security.AccessControl.AccessControlModification]::Add,$ace,[ref]$false)
+	$ADSI.PSBase.CommitChanges()
 }
 
 function VulnAD-PublicSMBShare {
