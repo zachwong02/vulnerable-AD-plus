@@ -203,7 +203,7 @@ function VulnAD-PasswordSpraying {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 12); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $same_password -AsPlainText -Force)
-        Set-ADUser $randomuser -Description "Company default password(Reset ASAP)"
+        Set-ADUser $randomuser -Description "Company default password(Reset ASAP)" -ChangePasswordAtLogon $true
         Write-Info "Same Password (Password Spraying) : $randomuser"
     }
 }
