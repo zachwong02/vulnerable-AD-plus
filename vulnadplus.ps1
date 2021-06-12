@@ -211,21 +211,20 @@ function VulnAD-DCSync {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
 
-        $userobject = (Get-ADUser -Identity $randomuser).distinguishedname
-        $ACL = Get-Acl -Path "AD:\$userobject"
-        $sid = (Get-ADUser -Identity $randomuser).sid
+        $Identity  = (Get-ADUser -Identity $randomuser)
+		$RootDSE = [ADSI]"LDAP://RootDSE"
+		$DefaultNamingContext = $RootDse.defaultNamingContext
+		$ConfigurationNamingContext = $RootDse.configurationNamingContext
+		$UserPrincipal = New-Object Security.Principal.NTAccount("$Identity")
 
-        $objectGuidGetChanges = New-Object Guid 1131f6aa-9c07-11d1-f79f-00c04fc2dcd2
-        $ACEGetChanges = New-Object DirectoryServices.ActiveDirectoryAccessRule($sid,'ExtendedRight','Allow',$objectGuidGetChanges)
-        $ACL.psbase.AddAccessRule($ACEGetChanges)
-
-        $objectGuidGetChanges = New-Object Guid 1131f6ad-9c07-11d1-f79f-00c04fc2dcd2
-        $ACEGetChanges = New-Object DirectoryServices.ActiveDirectoryAccessRule($sid,'ExtendedRight','Allow',$objectGuidGetChanges)
-        $ACL.psbase.AddAccessRule($ACEGetChanges)
-
-        $objectGuidGetChanges = New-Object Guid 89e95b76-444d-4c62-991a-0facbeda640c
-        $ACEGetChanges = New-Object DirectoryServices.ActiveDirectoryAccessRule($sid,'ExtendedRight','Allow',$objectGuidGetChanges)
-        $ACL.psbase.AddAccessRule($ACEGetChanges)
+		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
+		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
+		
+		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
+		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes All" | Out-Null
+		
+		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
+		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
 
         Set-ADUser $randomuser -Description "Replication Account"
         Write-Info "Giving DCSync to : $randomuser"
