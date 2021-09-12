@@ -21,12 +21,12 @@ function Write-Info { param( $String ) Write-Host $Global:InfoLine $String -Fore
 function ShowBanner {
     $banner  = @()
     $banner+= $Global:Spacing + ''
-    $banner+= $Global:Spacing + 'â–ˆâ–ˆâ•—   â–ˆâ–ˆâ•—â–ˆâ–ˆâ•—   â–ˆâ–ˆâ•—â–ˆâ–ˆâ•—     â–ˆâ–ˆâ–ˆâ•—   â–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—     â–ˆâ–ˆâ•—'
-    $banner+= $Global:Spacing + 'â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘     â–ˆâ–ˆâ–ˆâ–ˆâ•—  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—    â–ˆâ–ˆâ•‘'
-    $banner+= $Global:Spacing + 'â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘     â–ˆâ–ˆâ•”â–ˆâ–ˆâ•— â–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•‘'
-    $banner+= $Global:Spacing + 'â•šâ–ˆâ–ˆâ•— â–ˆâ–ˆâ•”â•â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘     â–ˆâ–ˆâ•‘â•šâ–ˆâ–ˆâ•—â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â•šâ•â•â•â–ˆâ–ˆâ•”â•â•â•â•'
-    $banner+= $Global:Spacing + ' â•šâ–ˆâ–ˆâ–ˆâ–ˆâ•”â• â•šâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•”â•â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—â–ˆâ–ˆâ•‘ â•šâ–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•”â•    â–ˆâ–ˆâ•‘'
-    $banner+= $Global:Spacing + '  â•šâ•â•â•â•   â•šâ•â•â•â•â•â• â•šâ•â•â•â•â•â•â•â•šâ•â•  â•šâ•â•â•â•â•šâ•â•  â•šâ•â•â•šâ•â•â•â•â•â•     â•šâ•â•'
+    $banner+= $Global:Spacing + '¦¦+   ¦¦+¦¦+   ¦¦+¦¦+     ¦¦¦+   ¦¦+ ¦¦¦¦¦+ ¦¦¦¦¦¦+     ¦¦+'
+    $banner+= $Global:Spacing + '¦¦¦   ¦¦¦¦¦¦   ¦¦¦¦¦¦     ¦¦¦¦+  ¦¦¦¦¦+--¦¦+¦¦+--¦¦+    ¦¦¦'
+    $banner+= $Global:Spacing + '¦¦¦   ¦¦¦¦¦¦   ¦¦¦¦¦¦     ¦¦+¦¦+ ¦¦¦¦¦¦¦¦¦¦¦¦¦¦  ¦¦¦¦¦¦¦¦¦¦¦¦¦¦'
+    $banner+= $Global:Spacing + '+¦¦+ ¦¦++¦¦¦   ¦¦¦¦¦¦     ¦¦¦+¦¦+¦¦¦¦¦+--¦¦¦¦¦¦  ¦¦¦+---¦¦+---+'
+    $banner+= $Global:Spacing + ' +¦¦¦¦++ +¦¦¦¦¦¦++¦¦¦¦¦¦¦+¦¦¦ +¦¦¦¦¦¦¦¦  ¦¦¦¦¦¦¦¦¦++    ¦¦¦'
+    $banner+= $Global:Spacing + '  +---+   +-----+ +------++-+  +---++-+  +-++-----+     +-+'
     $banner+= $Global:Spacing + ''                                                  
     $banner+= $Global:Spacing + 'By wazehell @safe_buffer - modified by WaterExecution'
     $banner | foreach-object {
@@ -219,7 +219,7 @@ function VulnAD-DefaultPassword
     }
 }
 function VulnAD-PasswordSpraying {
-    $same_password = VulnAD-GetRandom -InputList $Global:BadPasswords;
+    $same_password = ($Global:Domain -replace "\.\w+", "")+([string](Get-Random -Maximum 100)).PadLeft(3, '0')
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 12); $i=$i+1 ) {
         $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $same_password -AsPlainText -Force)
@@ -249,9 +249,12 @@ function VulnAD-DCSync {
 		
 		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
 		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
-
+		$randomgroup = (VulnAD-GetRandom -InputList $Global:Groups)
+		Add-ADGroupMember -Identity $randomgroup -Members $randomuser
         Set-ADUser $randomuser -Description "Replication Account"
         Write-Info "Giving DCSync to : $randomuser"
+		Write-Info "$randomuser in $randomgroup"
+		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
     }
 }
 function VulnAD-DisableSMBSigning {
@@ -331,6 +334,5 @@ function Invoke-VulnAD {
     VulnAD-PublicSMBShare
     Write-Good "Created Public SMB Share"
 	Write-Output "Restarting in 30 seconds..."
-	Restart-Computer -wait 30
 	Sleep 30; Restart-Computer
 }

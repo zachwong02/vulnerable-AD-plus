@@ -1,5 +1,5 @@
 <h1 align="center">
-  Vulnerable-AD
+  Vulnerable-AD-Plus
   <br>
 </h1>
 
@@ -29,10 +29,8 @@ Create a vulnerable active directory that's allowing you to test most of active 
 - Public SMB Share
 - Zerologon (Check version)
 
-### Improved QOL
-- "Fixed" Randomizer
-- Password is crackable... within a few days
-- Multiple ways to PWN
+### Writeup
+Now includes a writeup in the wiki section.
 
 ### Example
 ```powershell
