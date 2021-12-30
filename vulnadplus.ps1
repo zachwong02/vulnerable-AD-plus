@@ -288,7 +288,14 @@ function VulnAD-AnonymousLDAP {
 function VulnAD-PublicSMBShare {
 	mkdir C:\Common
 	New-SmbShare -Name Common -Path C:\Common -FullAccess Everyone
-}
+	Enable-LocalUser -Name "Guest"
+	$acl = Get-Acl C:\Common
+	$AccessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("Guest","FullControl","Allow")
+	$acl.SetAccessRule($AccessRule)
+	$acl | Set-Acl C:\Common
+	Set-Itemproperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'EveryoneIncludesAnonymous' -value '1'
+	New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters' -name "NullSessionShares" -PropertyType MultiString -value "C:\Common"
+} 
 
 function Invoke-VulnAD {
     Param(
