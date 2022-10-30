@@ -5,9 +5,21 @@ $Global:Groups = @('Office Admin','IT Admins','Executives','Senior management','
 $Global:HighGroups = @('Office Admin','IT Admins','Executives');
 $Global:MidGroups = @('Senior management','Project management','IT Helpdesk');
 $Global:NormalGroups = @('Marketing','Sales','Accounting');
-$Global:BadACL = @('GenericAll','GenericWrite','WriteOwner','WriteDACL','Self');
+$Global:OfficeAdmin = @();
+$Global:ITAdmins = @();
+$Global:Executives = @();
+$Global:Seniormanagement = @();
+$Global:Projectmanagement = @();
+$Global:ITHelpdesk = @();
+$Global:Marketing = @();
+$Global:Sales = @();
+$Global:Accounting = @();
+$Global:ACLperm = @('GenericAll','GenericWrite','WriteOwner','WriteDACL','Self');
 $Global:ServicesAccountsAndSPNs = @('mssql_svc,mssqlserver','http_svc,httpserver','exchange_svc,exserver');
+$Global:InitialAccessUsers = @();
 $Global:CreatedUsers = @();
+$Global:RemainingUsers = @();
+$Global:ACLUser = "";
 $Global:AllObjects = @();
 $Global:Domain = "";
 #Strings 
@@ -17,17 +29,17 @@ $Global:ErrorLine = "`t[-]"
 $Global:InfoLine = "`t[*]"
 function Write-Good { param( $String ) Write-Host $Global:PlusLine  $String -ForegroundColor 'Green'}
 function Write-Bad  { param( $String ) Write-Host $Global:ErrorLine $String -ForegroundColor 'red'  }
-function Write-Info { param( $String ) Write-Host $Global:InfoLine $String -ForegroundColor 'gray' }
+function Write-Info { param( $String ) Write-Host $Global:InfoLine $String -ForegroundColor 'gray'; echo $String >> generate.log }
 function ShowBanner {
     $banner  = @()
     $banner+= $Global:Spacing + ''
-    $banner+= $Global:Spacing + '¦¦+   ¦¦+¦¦+   ¦¦+¦¦+     ¦¦¦+   ¦¦+ ¦¦¦¦¦+ ¦¦¦¦¦¦+     ¦¦+'
-    $banner+= $Global:Spacing + '¦¦¦   ¦¦¦¦¦¦   ¦¦¦¦¦¦     ¦¦¦¦+  ¦¦¦¦¦+--¦¦+¦¦+--¦¦+    ¦¦¦'
-    $banner+= $Global:Spacing + '¦¦¦   ¦¦¦¦¦¦   ¦¦¦¦¦¦     ¦¦+¦¦+ ¦¦¦¦¦¦¦¦¦¦¦¦¦¦  ¦¦¦¦¦¦¦¦¦¦¦¦¦¦'
-    $banner+= $Global:Spacing + '+¦¦+ ¦¦++¦¦¦   ¦¦¦¦¦¦     ¦¦¦+¦¦+¦¦¦¦¦+--¦¦¦¦¦¦  ¦¦¦+---¦¦+---+'
-    $banner+= $Global:Spacing + ' +¦¦¦¦++ +¦¦¦¦¦¦++¦¦¦¦¦¦¦+¦¦¦ +¦¦¦¦¦¦¦¦  ¦¦¦¦¦¦¦¦¦++    ¦¦¦'
+    $banner+= $Global:Spacing + 'Â¦Â¦+   Â¦Â¦+Â¦Â¦+   Â¦Â¦+Â¦Â¦+     Â¦Â¦Â¦+   Â¦Â¦+ Â¦Â¦Â¦Â¦Â¦+ Â¦Â¦Â¦Â¦Â¦Â¦+     Â¦Â¦+'
+    $banner+= $Global:Spacing + 'Â¦Â¦Â¦   Â¦Â¦Â¦Â¦Â¦Â¦   Â¦Â¦Â¦Â¦Â¦Â¦     Â¦Â¦Â¦Â¦+  Â¦Â¦Â¦Â¦Â¦+--Â¦Â¦+Â¦Â¦+--Â¦Â¦+    Â¦Â¦Â¦'
+    $banner+= $Global:Spacing + 'Â¦Â¦Â¦   Â¦Â¦Â¦Â¦Â¦Â¦   Â¦Â¦Â¦Â¦Â¦Â¦     Â¦Â¦+Â¦Â¦+ Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦  Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦'
+    $banner+= $Global:Spacing + '+Â¦Â¦+ Â¦Â¦++Â¦Â¦Â¦   Â¦Â¦Â¦Â¦Â¦Â¦     Â¦Â¦Â¦+Â¦Â¦+Â¦Â¦Â¦Â¦Â¦+--Â¦Â¦Â¦Â¦Â¦Â¦  Â¦Â¦Â¦+---Â¦Â¦+---+'
+    $banner+= $Global:Spacing + ' +Â¦Â¦Â¦Â¦++ +Â¦Â¦Â¦Â¦Â¦Â¦++Â¦Â¦Â¦Â¦Â¦Â¦Â¦+Â¦Â¦Â¦ +Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦  Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦Â¦++    Â¦Â¦Â¦'
     $banner+= $Global:Spacing + '  +---+   +-----+ +------++-+  +---++-+  +-++-----+     +-+'
-    $banner+= $Global:Spacing + ''                                                  
+    $banner+= $Global:Spacing + ''                                                     
     $banner+= $Global:Spacing + 'By wazehell @safe_buffer - modified by WaterExecution'
     $banner | foreach-object {
         Write-Host $_ -ForegroundColor (Get-Random -Input @('Green','Cyan','Yellow','gray','white'))
@@ -55,21 +67,55 @@ function VulnAD-AddADUser {
         Write-Info "Creating $SamAccountName User"
         Try { New-ADUser -Name "$firstname $lastname" -GivenName $firstname -Surname $lastname -SamAccountName $SamAccountName -UserPrincipalName $principalname@$Global:Domain -AccountPassword (ConvertTo-SecureString $generated_password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
         $Global:CreatedUsers += $SamAccountName;
+        $Global:RemainingUsers += $SamAccountName;
     }
 }
-
 function VulnAD-AddADGroup {
     Param(
         [array]$GroupList
     )
+    $noOfGroup = [Math]::Floor($Global:CreatedUsers.length/30)
+    $Users = $Global:CreatedUsers.length - 30*$noOfGroup
     foreach ($group in $GroupList) {
         Write-Info "Creating $group Group"
         Try { New-ADGroup -name $group -GroupScope Global } Catch {}
-        for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 20); $i=$i+1 ) {
-            $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        if (@(Compare-Object $GroupList $Global:HighGroups -SyncWindow 0).Length -eq 0){
+            $noOfUsers = $noOfGroup*2
+        }
+        elseif (@(Compare-Object $GroupList $Global:MidGroups -SyncWindow 0).Length -eq 0){
+            if ($Users -ge 15){
+                $noOfUsers = [Math]::Floor(($Global:CreatedUsers.length-(($noOfGroup+1)*15)-($noOfGroup*6))/3)
+            }
+            else {
+                $noOfUsers = $noOfGroup*3
+            }
+        }
+        elseif (@(Compare-Object $GroupList $Global:NormalGroups -SyncWindow 0).Length -eq 0){
+            if ($Users -lt 30 -and $Users -gt 15){
+                $noOfUsers = [Math]::Floor(($noOfGroup+1)*15/3)
+            }
+            elseif ($Users -le 15 -and $Users -ne 0){
+                $noOfUsers = [Math]::Floor(($noOfGroup*15+$Users)/3)
+            }
+            else {
+                $noOfUsers = $noOfGroup*5
+            }
+        }
+        for ($i=1; $i -le $noOfUsers; $i=$i+1 ) {
+            $randomuser = (VulnAD-GetRandom -InputList $Global:RemainingUsers)
             Write-Info "Adding $randomuser to $group"
-			$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
+
             Try { Add-ADGroupMember -Identity $group -Members $randomuser } Catch {}
+            if ($group -eq "Office Admin"){ $Global:OfficeAdmin += $randomuser}
+            elseif ($group -eq "IT Admins"){ $Global:ITAdmins += $randomuser}
+            elseif ($group -eq "Executives"){ $Global:Executives += $randomuser}
+            elseif ($group -eq "Senior management"){ $Global:Seniormanagement += $randomuser}
+            elseif ($group -eq "Project management"){ $Global:Projectmanagement += $randomuser}
+            elseif ($group -eq "IT Helpdesk"){ $Global:ITHelpdesk += $randomuser}
+            elseif ($group -eq "Marketing"){ $Global:Marketing += $randomuser}
+            elseif ($group -eq "Sales"){ $Global:Sales += $randomuser}
+            elseif ($group -eq "Accounting"){ $Global:Accounting += $randomuser}
+            $Global:RemainingUsers = $Global:RemainingUsers -ne $randomuser
         }
         $Global:AllObjects += $group;
     }
@@ -100,47 +146,30 @@ function VulnAD-AddACL {
         $ADObject.psbase.ObjectSecurity.AddAccessRule($ACE)
         $ADObject.psbase.commitchanges()
 }
-function VulnAD-BadAcls {
-    foreach ($abuse in $Global:BadACL) {
+function VulnAD-Acls {
+    foreach ($abuse in $Global:Badperm) {
         $ngroup = VulnAD-GetRandom -InputList $Global:MidGroups
         $mgroup = VulnAD-GetRandom -InputList $Global:NormalGroups
-        $DstGroup = Get-ADGroup -Identity $mgroup
-        $SrcGroup = Get-ADGroup -Identity $ngroup
+        $SrcGroup = Get-ADGroup -Identity $mgroup
+        $DstGroup = Get-ADGroup -Identity $ngroup
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
-        Write-Info "BadACL $mgroup has $abuse permission for $ngroup"
+        Write-Info "ACL $mgroup has $abuse permission for $ngroup"
     }
-    foreach ($abuse in $Global:BadACL) {
+    foreach ($abuse in $Global:Badperm) {
         $hgroup = VulnAD-GetRandom -InputList $Global:HighGroups
         $mgroup = VulnAD-GetRandom -InputList $Global:MidGroups
-        $DstGroup = Get-ADGroup -Identity $hgroup
-        $SrcGroup = Get-ADGroup -Identity $mgroup
+        $SrcGroup = Get-ADGroup -Identity $hgroup
+        $DstGroup = Get-ADGroup -Identity $mgroup
         VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
-        Write-Info "BadACL $hgroup has $abuse permission for $mgroup"
+        Write-Info "ACL $hgroup has $abuse permission for $mgroup"
     }
-    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 20); $i=$i+1 ) {
-        $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
-        $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
-        $randomgroup = VulnAD-GetRandom -InputList $Global:AllObjects
-        if ((Get-Random -Maximum 2)){
-            $Dstobj = Get-ADUser -Identity $randomuser
-            $Srcobj = Get-ADGroup -Identity $randomgroup
-        }else{
-            $Srcobj = Get-ADUser -Identity $randomuser
-            $Dstobj = Get-ADGroup -Identity $randomgroup
-        }
-        VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
-        Write-Info "BadACL $randomgroup has $abuse permission for $randomuser"
-    }
-    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 10); $i=$i+1 ) {
-        $abuse = (VulnAD-GetRandom -InputList $Global:BadACL);
-        $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
-        $randomuser2 = VulnAD-GetRandom -InputList $Global:CreatedUsers
-        If(-not($randomuser -eq $randomuser2)){
-        $Dstobj = Get-ADUser -Identity $randomuser
-        $Srcobj = Get-ADUser -Identity $randomuser2
-        VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
-        Write-Info "BadACL $randomuser has $abuse permission for $randomuser2"
-        }
+    foreach ($abuse in $Global:Badperm) {
+        $hgroup = VulnAD-GetRandom -InputList $Global:HighGroups
+        $ngroup = VulnAD-GetRandom -InputList $Global:NormalGroups
+        $SrcGroup = Get-ADGroup -Identity $hgroup
+        $DstGroup = Get-ADGroup -Identity $ngroup
+        VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
+        Write-Info "ACL $hgroup has $abuse permission for $ngroup"
     }
 }
 function VulnAD-Kerberoasting {
@@ -163,99 +192,323 @@ function VulnAD-Kerberoasting {
 }
 function VulnAD-ASREPRoasting {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        $randomuser = (VulnAD-GetRandom -InputList (Get-Random -InputObject @($Global:Marketing, $Global:Sales, $Global:Accounting)))
         $password = VulnAD-GetRandom -InputList $Global:BadPasswords;
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $password -AsPlainText -Force)
         Set-ADAccountControl -Identity $randomuser -DoesNotRequirePreAuth 1
-		$randomgroup = (VulnAD-GetRandom -InputList $Global:Groups)
-		Add-ADGroupMember -Identity $randomgroup -Members $randomuser
         Write-Info "AS-REPRoasting $randomuser"
-		Write-Info "$randomuser in $randomgroup"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
+        $Global:InitialAccessUsers += $randomuser;
     }
 }
 function VulnAD-DnsAdmins {
 	Set-ADGroup -Identity "DnsAdmins" -GroupScope Universal
 	Set-ADGroup -Identity "DnsAdmins" -GroupScope Global
-    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
-        Add-ADGroupMember -Identity "DnsAdmins" -Members $randomuser
-		$randomgroup = (VulnAD-GetRandom -InputList $Global:MidGroups)
-		Add-ADGroupMember -Identity $randomgroup -Members $randomuser
-		Set-ADUser $randomuser -Description "DNS Admin"
-        Write-Info "DnsAdmins : $randomuser"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
-    }
-    $randomgroup = (VulnAD-GetRandom -InputList $Global:MidGroups)
-    Add-ADGroupMember -Identity $randomgroup -Members "DnsAdmins"
-    Write-Info "DnsAdmins Nested Group : $randomgroup"
-}
-function VulnAD-MoreAdmins {
-   for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
-        Add-ADGroupMember -Identity "Enterprise Admins" -Members $randomuser
-        Write-Info "Enterprise Admins : $randomuser"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
-    }
-   for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 3); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
-        Add-ADGroupMember -Identity "Account Operators" -Members $randomuser
-        Write-Info "Account Operators : $randomuser"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
-    }
+    Add-Type -AssemblyName System.Web
+
+    $firstname = (VulnAD-GetRandom -InputList $Global:HumansNames);
+    $lastname = (VulnAD-GetRandom -InputList $Global:HumansNames);
+    $fullname = "{0} {1}" -f ($firstname , $lastname);
+    $SamAccountName = ("{0}.{1}" -f ($firstname, $lastname)).ToLower();
+    $principalname = "{0}.{1}" -f ($firstname, $lastname);
+    $password = "UberSecurePassword"
+    Try { New-ADUser -Name "$firstname $lastname" -GivenName $firstname -Surname $lastname -SamAccountName $SamAccountName -UserPrincipalName $principalname@$Global:Domain -AccountPassword (ConvertTo-SecureString $password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
+
+    Add-ADGroupMember -Identity "DnsAdmins" -Members $SamAccountName
+    Set-ADUser $SamAccountName -Description "DNS Admin"
+    Write-Info "DnsAdmins : $SamAccountName"
 }
 function VulnAD-DefaultPassword
  {
     for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+        $randomuser = (VulnAD-GetRandom -InputList (Get-Random -InputObject @($Global:Marketing, $Global:Sales, $Global:Accounting)))
         $password = ([System.Web.Security.Membership]::GeneratePassword(7,2))
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $password -AsPlainText -Force)
         Set-ADUser $randomuser -Description "New user generated password: $password" -ChangePasswordAtLogon $true
-		$randomgroup = (VulnAD-GetRandom -InputList $Global:Groups)
-		Add-ADGroupMember -Identity $randomgroup -Members $randomuser
         Write-Info "Password in Description : $randomuser $password"
-		Write-Info "$randomuser in $randomgroup"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
+        $Global:InitialAccessUsers += $randomuser;
     }
 }
 function VulnAD-PasswordSpraying {
     $same_password = ($Global:Domain -replace "\.\w+", "")+([string](Get-Random -Maximum 100)).PadLeft(3, '0')
-    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 12); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+    for ($i=1; $i -le (Get-Random -Minimum 2 -Maximum 6); $i=$i+1 ) {
+        $randomuser = (VulnAD-GetRandom -InputList (Get-Random -InputObject @($Global:Marketing, $Global:Sales, $Global:Accounting)))
         Set-AdAccountPassword -Identity $randomuser -Reset -NewPassword (ConvertTo-SecureString $same_password -AsPlainText -Force)
         Set-ADUser $randomuser -Description "Company default password(Reset ASAP)" -ChangePasswordAtLogon $true
-		$randomgroup = (VulnAD-GetRandom -InputList $Global:Groups)
-		Add-ADGroupMember -Identity $randomgroup -Members $randomuser
         Write-Info "Same Password (Password Spraying) : $randomuser"
-		Write-Info "$randomuser in $randomgroup"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
+        $Global:InitialAccessUsers += $randomuser;
+    }
+}
+function Counter{
+    param(
+        [string]$path
+    )
+    $counter = @{};
+    foreach ($letter in [char[]]$path){
+        $letter = [string]$letter
+        if (-not $counter.Contains($letter)){
+            $counter[$letter] =  0
+        }
+        $counter[$letter] += 1
+    }
+    return $counter
+}
+function getList{
+    param(
+        [string]$path,
+        [array]$list
+    )
+    $r = 0
+    $newlist = [System.Collections.ArrayList]::new()
+    foreach ($o in $list)
+    {
+        $newlist.add($o)
+        
+    }
+    $mapping = @("Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "IT Admins", "Executives")
+    foreach ($i in (Counter($path)).keys){
+        if ((Counter($path))[$i] -ge 2){
+            foreach ($j in (Counter($path)).keys){
+                $newlist.remove($mapping[$j-1])
+            }
+        }
+    }
+    return $newlist
+}
+function getPath{
+    $mapping = @{"Marketing" = "1"; "Sales" = "2"; "Accounting" = "3"; "Senior management" = "4"; "Project management" = "5"; "IT Helpdesk" = "6"; "Office Admin" = "7"; "IT admins" = "8"; "Executives" = "9";}
+    $path = ""
+    $path2 = ""
+    $end = VulnAD-GetRandom -InputList $Global:HighGroups
+    $middle = VulnAD-GetRandom -InputList $Global:MidGroups
+    $start = VulnAD-GetRandom -InputList $Global:NormalGroups
+    $path += $mapping[$start]
+    $path2 += $mapping[$middle]
+    if ((Get-Random -Maximum 2)){
+        while ($path[-1] -ne $mapping[$end]){
+            $path += $mapping[(VulnAD-GetRandom -InputList (getList -path $path -list ($Global:NormalGroups+$end)))]
+        }
+        Write-Info "Path: $path"
+        return $path
+    }
+    else{
+        while ($path[-1] -ne $mapping[$middle]){
+            $path += $mapping[(VulnAD-GetRandom -InputList (getList -path $path -list ($Global:NormalGroups+$middle)))]
+        }
+        while ($path2[-1] -ne $mapping[$end]){
+            $path2 += $mapping[(VulnAD-GetRandom -InputList (getList -path ($path+$path2) -list ($Global:MidGroups+$end)))]
+        }
+        Write-Info "Path: $path$path2"
+        return $path+$path2
+    }
+}
+function VulnAD-UserAcl{
+    param(
+        [string]$src,
+        [string]$dst
+    )
+    $mapping = @("","Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "It Admins", "Executives")
+    $firstname = (VulnAD-GetRandom -InputList $Global:HumansNames);
+    $lastname = (VulnAD-GetRandom -InputList $Global:HumansNames);
+    $fullname = "{0} {1}" -f ($firstname , $lastname);
+    $SamAccountName = ("{0}.{1}" -f ($firstname, $lastname)).ToLower();
+    $principalname = "{0}.{1}" -f ($firstname, $lastname);
+    $generated_password = ([System.Web.Security.Membership]::GeneratePassword(7,2))
+    Try { New-ADUser -Name "$firstname $lastname" -GivenName $firstname -Surname $lastname -SamAccountName $SamAccountName -UserPrincipalName $principalname@$Global:Domain -AccountPassword (ConvertTo-SecureString $generated_password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
+    Try { Add-ADGroupMember -Identity $mapping[$dst] -Members $SamAccountName } Catch {}
+    if ($Global:ACLUser){
+        $SrcUser = Get-ADUser -identity $Global:ACLUser
+    }
+    else {
+        $SrcUser = Get-ADUser -identity (VulnAD-GetRandom -InputList $Global:InitialAccessUsers)
+        $Global:InitialAccessUsers = $Global:InitialAccessUsers -ne $SrcUser
+    }
+    $DstUser = Get-ADUser -identity $SamAccountName
+    $Global:ACLUser = Get-ADUser -identity $SamAccountName
+    if ($True){
+        VulnAD-AddACL -Source $SrcUser.sid -Destination $DstUser.DistinguishedName -Rights "GenericAll"
+        Write-Info ("Giving "+$SrcUser.Name+" GenericAll over "+$DstUser.Name+"("+$mapping[$dst]+")")
+    }
+    else{
+        # Figure out how to add User-Force-Change-Password
+        # VulnAD-AddACL -Source $SrcUser -Destination $DstUser.DistinguishedName -Rights "User-Force-Change-Password"
+        Write-Info "Giving $SrcUser.Name User-Force-Change-Password over $DstUser.Name"
+    }
+}
+function VulnAD-GroupUserAcl{
+    param(
+        [string]$src,
+        [string]$dst
+    )
+    $mapping = @("","Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "It Admins", "Executives")
+
+    $firstname = (VulnAD-GetRandom -InputList $Global:HumansNames);
+    $lastname = (VulnAD-GetRandom -InputList $Global:HumansNames);
+    $fullname = "{0} {1}" -f ($firstname , $lastname);
+    $SamAccountName = ("{0}.{1}" -f ($firstname, $lastname)).ToLower();
+    $principalname = "{0}.{1}" -f ($firstname, $lastname);
+    $generated_password = ([System.Web.Security.Membership]::GeneratePassword(7,2))
+    Try { New-ADUser -Name "$firstname $lastname" -GivenName $firstname -Surname $lastname -SamAccountName $SamAccountName -UserPrincipalName $principalname@$Global:Domain -AccountPassword (ConvertTo-SecureString $generated_password -AsPlainText -Force) -PassThru | Enable-ADAccount } Catch {}
+    Try { Add-ADGroupMember -Identity $mapping[$dst] -Members $SamAccountName } Catch {}
+
+    $SrcGroup = Get-ADGroup -Identity $mapping[$src]
+    $DstUser = Get-ADUser -identity $SamAccountName
+    $Global:ACLUser = Get-ADUser -identity $SamAccountName
+    if ($True){
+        VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstUser.DistinguishedName -Rights "GenericAll"
+        Write-Info ("Giving "+$SrcGroup.Name+" GenericAll over "+$DstUser.Name+"("+$mapping[$dst]+")")
+    }
+    else{
+        # Figure out how to add User-Force-Change-Password
+        # VulnAD-AddACL -Source $SrcUser -Destination $DstUser.DistinguishedName -Rights "User-Force-Change-Password"
+        Write-Info "Giving $SrcUser.Name User-Force-Change-Password over $DstUser.Name"
+    }
+}
+function VulnAD-UserGroupAcl{
+    param(
+        [string]$dst
+    )
+    $mapping = @("","Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "It Admins", "Executives")
+
+    $DstGroup = Get-ADGroup -Identity $mapping[$dst]
+    if ($True){
+        VulnAD-AddACL -Source $Global:ACLUser.sid -Destination $Dstgroup.DistinguishedName -Rights "GenericAll"
+        Write-Info ("Giving "+$Global:ACLUser.Name+" GenericAll over "+$Dstgroup.Name)
+    }
+    else{
+        # Figure out how to add User-Force-Change-Password
+        # VulnAD-AddACL -Source $SrcUser -Destination $DstUser.DistinguishedName -Rights "User-Force-Change-Password"
+        Write-Info "Giving $SrcUser.Name User-Force-Change-Password over $DstUser.Name"
+    }
+}
+function VulnAD-GroupAcl{
+    param(
+        [string]$src,
+        [string]$dst
+    )
+    $mapping = @("","Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "It Admins", "Executives")
+    $SrcGroup = Get-ADGroup -Identity $mapping[$src]
+    $DstGroup = Get-ADGroup -Identity $mapping[$dst]
+    $abuse = Get-Random -InputObject @('GenericAll', 'WriteProperty', 'Self', 'WriteOwner', 'DoublePerm')
+    if ($abuse -eq "DoublePerm"){
+        VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights "WriteDACL"
+        VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights "WriteOwner"
+        Write-Info ("Giving "+$SrcGroup.Name+" WriteDACL & WriteOwner over "+$DstGroup.Name)
+    }
+    else {
+        VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
+        Write-Info ("Giving "+$SrcGroup.Name+" "+$abuse+" over "+$DstGroup.Name)
+    }
+}
+function VulnAD-BadAcls {
+    $mapping = @($Global:Marketing, $Global:Sales, $Global:Accounting, $Global:Seniormanagement, $Global:Projectmanagement, $Global:ITHelpdesk, $Global:OfficeAdmin, $Global:ITAdmins, $Global:Executives)
+    $path = getPath
+    if ($path[0] -eq $path[1]){
+        $DstUser = Get-ADUser -identity (VulnAD-GetRandom -InputList ($mapping[[string]$path[1]-1]))
+        if ($True){
+            $InitialUser = Get-ADUser -identity (VulnAD-GetRandom -InputList $Global:InitialAccessUsers)
+            $Global:InitialAccessUsers = $Global:InitialAccessUsers -ne $InitialUser
+            $Global:ACLUser = Get-ADUser -identity $DstUser
+            VulnAD-AddACL -Source $InitialUser.sid -Destination $DstUser.DistinguishedName -Rights "GenericAll"
+            Write-Info ("Giving "+$InitialUser.Name+" GenericAll over "+$DstUser.Name)
+        }
+        else{
+            # Figure out how to add User-Force-Change-Password
+            # VulnAD-AddACL -Source $SrcUser -Destination $DstUser.DistinguishedName -Rights "User-Force-Change-Password"
+            Write-Info "Giving $SrcUser.Name User-Force-Change-Password over $DstUser.Name"
+        }
+    }
+    else{
+        $mapping = @("Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "It Admins", "Executives")
+        $SrcGroup = Get-ADGroup -Identity $mapping[[string]$path[0]]
+    }
+    $count = 0
+    $Duplicates = @()
+    foreach ($i in (Counter($path)).keys){
+        if ((Counter($path))[$i] -ge 2){
+            $Duplicates += $i
+        }
+    }
+    $DupPosition = @()
+    $DupPosition2 = @()
+    foreach ($i in $Duplicates){
+        $DupPosition += [string]$path.LastIndexOf($i)
+    }
+    foreach ($i in $Duplicates){
+        $DupPosition2 += [string]($path.LastIndexOf($i)+2)
+    }
+    $intersect = $DupPosition | ?{$DupPosition2 -contains $_}
+    foreach ($num in [char[]]$path[1..(([char[]]$path).Count-1)]){
+        $count++
+        if([string]$path[[string]$count-1] -eq [string]$path[$count] -or $intersect -eq $count+1){
+            VulnAD-UserAcl -src ([string]$path[[string]$count-1]) -dst ([string]$path[$count])
+        }
+        elseif ($DupPosition.Contains([string]$count)){
+            VulnAD-GroupUserAcl -src ([string]$path[[string]$count-1]) -dst ([string]$path[$count])
+        }
+        elseif ($DupPosition2.Contains([string]($count+1))){
+            VulnAD-UserGroupAcl -dst ([string]$path[$count])
+        }
+        else{
+            VulnAD-GroupAcl -src ([string]$path[[string]$count-1]) -dst ([string]$path[$count])
+        }
+
+    }
+    $mapping = @("Marketing", "Sales", "Accounting", "Senior management", "Project management", "IT Helpdesk", "Office Admin", "It Admins", "Executives")
+    VulnAD-DCSync -group ($mapping[([string]$path[-1]-1)])
+
+    foreach ($abuse in $Global:ACLperm) {
+        $hgroup = VulnAD-GetRandom -InputList $Global:HighGroups
+        $mgroup = VulnAD-GetRandom -InputList $Global:MidGroups
+        $DstGroup = Get-ADGroup -Identity $hgroup
+        $SrcGroup = Get-ADGroup -Identity $mgroup
+        VulnAD-AddACL -Source $SrcGroup.sid -Destination $DstGroup.DistinguishedName -Rights $abuse
+        Write-Info "BadACL $hgroup has $abuse permission for $mgroup"
+    }
+    for ($i=1; $i -le (Get-Random -Minimum 10 -Maximum 30); $i=$i+1 ) {
+        $abuse = (VulnAD-GetRandom -InputList $Global:ACLperm);
+        $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
+        $randomgroup = VulnAD-GetRandom -InputList $Global:AllObjects
+        if ((Get-Random -Maximum 2)){
+            $Dstobj = Get-ADUser -Identity $randomuser
+            $Srcobj = Get-ADGroup -Identity $randomgroup
+        }else{
+            $Srcobj = Get-ADUser -Identity $randomuser
+            $Dstobj = Get-ADGroup -Identity $randomgroup
+        }
+        VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
+        Write-Info "BadACL $randomgroup has $abuse permission for $randomuser"
+    }
+    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 30); $i=$i+1 ) {
+        $abuse = (VulnAD-GetRandom -InputList $Global:ACLperm);
+        $randomuser = VulnAD-GetRandom -InputList $Global:CreatedUsers
+        $randomuser2 = VulnAD-GetRandom -InputList $Global:CreatedUsers
+        If(-not($randomuser -eq $randomuser2)){
+        $Dstobj = Get-ADUser -Identity $randomuser
+        $Srcobj = Get-ADUser -Identity $randomuser2
+        VulnAD-AddACL -Source $Srcobj.sid -Destination $Dstobj.DistinguishedName -Rights $abuse 
+        Write-Info "BadACL $randomuser has $abuse permission for $randomuser2"
+        }
     }
 }
 function VulnAD-DCSync {
-    for ($i=1; $i -le (Get-Random -Minimum 1 -Maximum 6); $i=$i+1 ) {
-        $randomuser = (VulnAD-GetRandom -InputList $Global:CreatedUsers)
+    param(
+        [string]$group
+    )
+    $Identity  = (Get-ADGroup -Identity $group)
+    $RootDSE = [ADSI]"LDAP://RootDSE"
+    $DefaultNamingContext = $RootDse.defaultNamingContext
+    $ConfigurationNamingContext = $RootDse.configurationNamingContext
+    $UserPrincipal = New-Object Security.Principal.NTAccount("$Identity")
 
-        $Identity  = (Get-ADUser -Identity $randomuser)
-		$RootDSE = [ADSI]"LDAP://RootDSE"
-		$DefaultNamingContext = $RootDse.defaultNamingContext
-		$ConfigurationNamingContext = $RootDse.configurationNamingContext
-		$UserPrincipal = New-Object Security.Principal.NTAccount("$Identity")
-
-		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
-		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
-		
-		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes All" | Out-Null
-		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes All" | Out-Null
-		
-		DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
-		DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
-		$randomgroup = (VulnAD-GetRandom -InputList $Global:Groups)
-		Add-ADGroupMember -Identity $randomgroup -Members $randomuser
-        Set-ADUser $randomuser -Description "Replication Account"
-        Write-Info "Giving DCSync to : $randomuser"
-		Write-Info "$randomuser in $randomgroup"
-		$Global:CreatedUsers = $Global:CreatedUsers -ne $randomuser
-    }
+    DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
+    DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes" | Out-Null
+    
+    DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes All" | Out-Null
+    DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes All" | Out-Null
+    
+    DSACLS "$DefaultNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
+    DSACLS "$ConfigurationNamingContext" /G "$($UserPrincipal):CA;Replicating Directory Changes In Filtered Set" | Out-Null
+    Write-Info "Giving DCSync to : $group"
 }
 function VulnAD-DisableSMBSigning {
         Set-SmbClientConfiguration -RequireSecuritySignature 0 -EnableSecuritySignature 0 -Confirm -Force
@@ -287,6 +540,7 @@ function VulnAD-AnonymousLDAP {
 
 function VulnAD-PublicSMBShare {
 	mkdir C:\Common
+    echo "$password = ConvertTo-SecureString 'UberSecurePassword' -AsPlainText -Force`n$credential = New-Object System.Management.Automation.PSCredential ('administrator', $password)`nInvoke-Command -ComputerName . -Credential $credential -ScriptBlock { Restart-Service -Name 'DNS Server' }" > C:\Common\DNSrestart.ps1
 	New-SmbShare -Name Common -Path C:\Common -FullAccess Everyone
 	Enable-LocalUser -Name "Guest"
 	$acl = Get-Acl C:\Common
@@ -295,6 +549,10 @@ function VulnAD-PublicSMBShare {
 	$acl | Set-Acl C:\Common
 	Set-Itemproperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'EveryoneIncludesAnonymous' -value '1'
 	New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters' -name "NullSessionShares" -PropertyType MultiString -value "C:\Common"
+}
+
+function VulnAD-FirewallOff {
+	netsh advfirewall set allprofiles state off
 } 
 
 function Invoke-VulnAD {
@@ -308,6 +566,10 @@ function Invoke-VulnAD {
     ShowBanner
     $Global:Domain = $DomainName
     Set-ADDefaultDomainPasswordPolicy -Identity $Global:Domain -LockoutDuration 00:01:00 -LockoutObservationWindow 00:01:00 -ComplexityEnabled $false -ReversibleEncryptionEnabled $False -MinPasswordLength 4
+    if ($UsersLimit -lt 30) {
+        Write-Output "Setting minimum 30 users"
+        $UsersLimit = 30
+    }
     VulnAD-AddADUser -limit $UsersLimit
     Write-Good "Users Created"
     VulnAD-AddADGroup -GroupList $Global:HighGroups
@@ -316,21 +578,20 @@ function Invoke-VulnAD {
     Write-Good "$Global:MidGroups Groups Created"
     VulnAD-AddADGroup -GroupList $Global:NormalGroups
     Write-Good "$Global:NormalGroups Groups Created"
-    VulnAD-BadAcls
-    Write-Good "BadACL Done"
+    VulnAD-Acls
+    Write-Good "ACL Done"
     VulnAD-Kerberoasting
     Write-Good "Kerberoasting Done"
     VulnAD-ASREPRoasting
     Write-Good "AS-REPRoasting Done"
     VulnAD-DnsAdmins
     Write-Good "DnsAdmins Done"
-    VulnAD-MoreAdmins
-    Write-Good "MoreAdmins Done"
     VulnAD-DefaultPassword
     Write-Good "Leaked Password Done"
     VulnAD-PasswordSpraying
     Write-Good "Password Spraying Done"
-    VulnAD-DCSync
+    VulnAD-BadAcls
+    Write-Good "Bad ACL Done"
     Write-Good "DCSync Done"
     VulnAD-DisableSMBSigning
     Write-Good "SMB Signing Disabled"
@@ -340,6 +601,10 @@ function Invoke-VulnAD {
     Write-Good "Anonymous LDAP Query Enabled"
     VulnAD-PublicSMBShare
     Write-Good "Created Public SMB Share"
+    VulnAD-FirewallOff
+    Write-Good "Firewall Turned Off"
 	Write-Output "Restarting in 30 seconds..."
 	Sleep 30; Restart-Computer
 }
+
+Invoke-VulnAD -UsersLimit 100 -DomainName "change.me"
